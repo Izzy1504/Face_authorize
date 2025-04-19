@@ -113,6 +113,91 @@ sudo make install
 
 Then configure your PAM service to use the module.
 
+## Ubuntu Login Integration
+
+To set up the face authentication system to run at Ubuntu startup and unlock the lock screen:
+
+### 1. Complete PAM Module Installation
+
+Ensure you've built and installed the PAM module as described above.
+
+### 2. Configure PAM for Face Authentication
+
+1. Create a backup of your PAM config file:
+   ```bash
+   sudo cp /etc/pam.d/common-auth /etc/pam.d/common-auth.backup
+   ```
+
+2. Edit the PAM configuration:
+   ```bash
+   sudo nano /etc/pam.d/common-auth
+   ```
+
+3. Add the following line before the `@include` statements:
+   ```
+   auth sufficient pam_face_auth.so
+   ```
+
+### 3. Create a Systemd Service
+
+1. Create a systemd service file:
+   ```bash
+   sudo nano /etc/systemd/system/face-auth.service
+   ```
+
+2. Add the following content:
+   ```
+   [Unit]
+   Description=Face Authentication Service
+   After=display-manager.service
+
+   [Service]
+   User=YOUR_USERNAME
+   WorkingDirectory=/home/izzy/face_auth_system
+   ExecStart=/home/izzy/face_auth_system/venv/bin/python /home/izzy/face_auth_system/scripts/face_auth.py --service
+   Restart=on-failure
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   Replace `YOUR_USERNAME` with your actual username.
+
+3. Enable and start the service:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable face-auth.service
+   sudo systemctl start face-auth.service
+   ```
+
+### 4. Test the Integration
+
+1. Lock your screen or log out.
+2. The face authentication should activate when you attempt to log back in.
+
+### 5. Troubleshooting Login Integration
+
+If face authentication isn't working at login:
+
+1. Check service status:
+   ```bash
+   sudo systemctl status face-auth.service
+   ```
+
+2. Review logs:
+   ```bash
+   journalctl -u face-auth.service
+   ```
+
+3. Verify the PAM module is properly configured:
+   ```bash
+   grep face_auth /etc/pam.d/common-auth
+   ```
+
+4. Try running the face auth script manually with the service flag:
+   ```bash
+   /home/izzy/face_auth_system/venv/bin/python /home/izzy/face_auth_system/scripts/face_auth.py --service
+   ```
+
 ## Directory Structure
 
 - `/data/` - Stores face images for each user
