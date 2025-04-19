@@ -1,0 +1,35 @@
+# Virtual Environments
+venv/
+env/
+.env/
+.venv/
+ENV/
+virtualenv/
+pythonenv*
+
+# Environment variables
+.env
+*.env
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+
+# Dataset - uncomment if you want to ignore collected faces
+# data/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo

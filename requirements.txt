@@ -1,0 +1,6 @@
+opencv-python
+face_recognition
+git+https://github.com/ageitgey/face_recognition_models
+scikit-learn
+Pillow
+numpy
