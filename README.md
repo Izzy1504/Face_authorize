@@ -12,77 +12,122 @@ This system provides secure face authentication with an iOS-style Face ID interf
 
 ## Installation
 
+### Ubuntu Installation
+
 1. **Clone the repository:**
    ```bash
    git clone <repository_url>
    cd face_auth_system
    ```
 
-2. **Set up the virtual environment:**
+2. **Install system dependencies:**
+   ```bash
+   # Run the dependency installation script
+   chmod +x install_dependencies.sh
+   ./install_dependencies.sh
+   ```
+
+3. **Set up the virtual environment:**
+   ```bash
+   # Run the setup script to create and configure the virtual environment
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+
+   Alternatively, you can manually set up the virtual environment:
    ```bash
    python3 -m venv venv
    source venv/bin/activate
-   ```
-
-3. **Install the required packages:**
-   ```bash
    pip install -r requirements.txt
    ```
 
-4. **Make the scripts executable:**
+4. **Generate UI images:**
    ```bash
-   ./make_executable.sh
+   # Make the script executable
+   chmod +x scripts/generate_ui_images.py
+   # Run the script
+   ./scripts/generate_ui_images.py
+   ```
+
+5. **Make all scripts executable:**
+   ```bash
+   # Make all Python scripts executable
+   chmod +x scripts/*.py
+   chmod +x start_face_auth.sh
    ```
 
 ## Usage
 
-### Register a Face
+### Collect Face Data
 
-To register a new face for a user:
+To collect face data for a new user:
 ```bash
-./face_auth.sh --train --user <username>
+source venv/bin/activate
+python scripts/collect_faces.py --username <username> --samples 30
+```
+
+### Train the Model
+
+After collecting face data, train the model:
+```bash
+source venv/bin/activate
+python scripts/train_model.py --data-dir data --output models/face_auth_model.pkl
 ```
 
 ### Authenticate a User
 
 To authenticate a user:
 ```bash
-./face_auth.sh --user <username>
+source venv/bin/activate
+python scripts/face_auth.py --username <username>
 ```
 
-### List Registered Users
-
-To list all registered users:
+Or use the convenience script:
 ```bash
-./face_auth.sh --list
+./start_face_auth.sh --username <username>
+```
+
+### Troubleshooting Face Recognition
+
+To diagnose issues with face recognition:
+```bash
+source venv/bin/activate
+python scripts/diagnose_face_recognition.py
 ```
 
 ## Authentication Parameters
 
 You can customize the authentication process with these parameters:
 
-- `--attempts <number>`: Set the maximum number of recognition attempts (default: 10)
-- `--required <number>`: Set the minimum number of successful recognitions required (default: 6)
 - `--threshold <float>`: Set the confidence threshold for face recognition (default: 0.6)
+- `--model <path>`: Specify a different model file (default: models/face_auth_model.pkl)
 
-## Troubleshooting
+## PAM Module Integration (Advanced)
 
-If you encounter import errors, the system will try to automatically create a symlink from `train_model.py` to `face_train.py`. You can manually create this with:
-
+To build and install the PAM module for system authentication:
 ```bash
-# On Linux/macOS
-ln -s train_model.py face_train.py
-
-# On Windows
-copy train_model.py face_train.py
+cd pam_module
+make
+sudo make install
 ```
+
+Then configure your PAM service to use the module.
 
 ## Directory Structure
 
 - `/data/` - Stores face images for each user
 - `/models/` - Stores trained face recognition models
 - `/images/` - Contains UI assets
+- `/scripts/` - Python scripts for face collection, training, and authentication
+- `/pam_module/` - C code for PAM integration
 
-## Additional Information
+## Troubleshooting
 
-For more details on each script and its functionality, refer to the `scripts/README.md` file.
+If you encounter import errors related to face_recognition or dlib:
+1. Make sure all system dependencies are installed via `install_dependencies.sh`
+2. Try reinstalling dlib with `pip install --force-reinstall dlib`
+3. Check if your Python version is compatible (Python 3.6-3.9 recommended)
+
+For camera access issues:
+1. Ensure your user has permissions to access the camera
+2. Try running with sudo if needed: `sudo ./start_face_auth.sh --username <username>`
